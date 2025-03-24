@@ -1,0 +1,136 @@
+package br.com.walkflix.Service.Actor;
+
+import br.com.walkflix.Model.ApiResponse;
+import br.com.walkflix.Model.Entitie.Actor.Actor;
+import br.com.walkflix.Model.Entitie.Actor.ActorRepository;
+import br.com.walkflix.Utils.DefaultErroMessage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.S3Object;
+
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class ActorService {
+    @Autowired
+    private ActorRepository actorRepository;
+
+    public ResponseEntity<ApiResponse> saveFilePath(int id, String filePath){
+        try{
+            return actorRepository.findById(id).map(actor -> {
+                actor.setTxProfilePicture(filePath);
+                actorRepository.save(actor);
+
+                return ResponseEntity.ok(new ApiResponse(
+                        "Arquivo salvo com sucesso!",
+                        actor,
+                        HttpStatus.OK.value()
+                ));
+            }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
+                    "Não foi possível salvar o caminho do arquivo: Ator/Atriz não encontrado.",
+                    null,
+                    HttpStatus.NOT_FOUND.value()
+            )));
+        } catch(Exception e){
+            return DefaultErroMessage.getDefaultError(e);
+        }
+    }
+
+    public ResponseEntity<ApiResponse> createActor(Actor actor) {
+        try {
+            return ResponseEntity.created(URI.create("/actors")).body(new ApiResponse(
+                    "Ator registrado com sucesso!",
+                    actorRepository.save(actor),
+                    HttpStatus.CREATED.value()
+            ));
+        } catch (Exception e) {
+            return DefaultErroMessage.getDefaultError(e);
+        }
+    }
+
+    public ResponseEntity<ApiResponse> editActor(int idActor, Actor editedActor) {
+        try {
+            editedActor.setId(idActor);
+
+            return ResponseEntity.ok(new ApiResponse(
+                    "Ator editado com sucesso!",
+                    actorRepository.save(editedActor),
+                    HttpStatus.OK.value()
+            ));
+        } catch (Exception e) {
+            return DefaultErroMessage.getDefaultError(e);
+        }
+    }
+
+    public ResponseEntity<ApiResponse> deleteActor(int id) {
+        try {
+            return actorRepository.findById(id)
+                    .map(actor -> {
+                        if (!actor.getSeries().isEmpty()) {
+                            return ResponseEntity.badRequest().body(new ApiResponse(
+                                    "Não foi possível excluir o(a) Ator/Atriz selecionado(a): Ator/Atriz está vinculado(a) com alguma série.",
+                                    null,
+                                    HttpStatus.BAD_REQUEST.value()
+                            ));
+                        }
+                        actorRepository.deleteById(id);
+                        return ResponseEntity.ok(new ApiResponse(
+                                "Ator/Atriz excluído(a) com sucesso.",
+                                null,
+                                HttpStatus.OK.value()
+                        ));
+                    })
+                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
+                            "Ator/Atriz não encontrado!",
+                            null,
+                            HttpStatus.NOT_FOUND.value()
+                    )));
+        } catch (Exception e) {
+            return DefaultErroMessage.getDefaultError(e);
+        }
+    }
+
+    public ResponseEntity<ApiResponse> getActor(int id) {
+        try {
+            Optional<Actor> actor = actorRepository.findById(id);
+
+            return actor.map(value -> ResponseEntity.ok().body(new ApiResponse(
+                    "Ator retornado com sucesso!",
+                    value,
+                    HttpStatus.OK.value()
+            ))).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ApiResponse(
+                            "Ator não encontrado.",
+                            null,
+                            HttpStatus.NOT_FOUND.value()
+                    )));
+        } catch (Exception e) {
+            return DefaultErroMessage.getDefaultError(e);
+        }
+    }
+
+    public ResponseEntity<ApiResponse> getAllActors() {
+        try {
+            List<Actor> actors = actorRepository.findAll();
+
+            return !actors.isEmpty() ? ResponseEntity.ok(new ApiResponse(
+                    "Atores e/ou Atrizes encontrados com sucesso.",
+                    actors,
+                    HttpStatus.OK.value()
+            )) : ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
+                    "Não foi possível encontrar nenhum ator/atriz.",
+                    null,
+                    HttpStatus.NOT_FOUND.value()
+            ));
+        } catch (Exception e) {
+            return DefaultErroMessage.getDefaultError(e);
+        }
+    }
+
+
+}

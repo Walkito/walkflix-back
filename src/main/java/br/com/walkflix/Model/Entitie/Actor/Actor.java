@@ -58,14 +58,25 @@ public class Actor {
     @OneToMany(mappedBy = "actor")
     private List<Character> characters = new ArrayList<>();
 
+    @OneToMany(mappedBy = "director", fetch = FetchType.EAGER)
+    private List<Series> directedSeries = new ArrayList<>();
+
     public Actor() {
     }
 
-    public @NotBlank(message = "Sobrenome do Ator é obrigatório") String getTxActorSurname() {
+    public List<Series> getDirectedSeries() {
+        return directedSeries;
+    }
+
+    public void setDirectedSeries(List<Series> directedSeries) {
+        this.directedSeries = directedSeries;
+    }
+
+    public String getTxActorSurname() {
         return txActorSurname;
     }
 
-    public void setTxActorSurname(@NotBlank(message = "Sobrenome do Ator é obrigatório") String txActorSurname) {
+    public void setTxActorSurname(String txActorSurname) {
         this.txActorSurname = txActorSurname;
     }
 

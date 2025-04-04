@@ -2,9 +2,7 @@ package br.com.walkflix.Model.Entitie.Series.Episode;
 
 import br.com.walkflix.Model.Entitie.Series.Series;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 
@@ -14,6 +12,11 @@ public class Episode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(length = 3, nullable = false)
+    @Min(value = 1, message = "Número do episódio deve ser entreo 0 e 100")
+    @Max(value = 999, message = "Número do episódio deve ser entreo 0 e 100")
+    private int nuEpisode;
 
     @Column(length = 70, nullable = false)
     @NotBlank(message = "Nome do episódio é obrigatório")
@@ -37,6 +40,14 @@ public class Episode {
     private Series series;
 
     public Episode() {
+    }
+
+    public int getNuEpisode() {
+        return nuEpisode;
+    }
+
+    public void setNuEpisode(int nuEpisode) {
+        this.nuEpisode = nuEpisode;
     }
 
     public String getTxEpisodePicture() {

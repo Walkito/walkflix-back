@@ -2,7 +2,7 @@ package br.com.walkflix.Controller.Series;
 
 import br.com.walkflix.Model.ApiResponse;
 import br.com.walkflix.Model.Entitie.Series.Series;
-import br.com.walkflix.Model.ImageDTO;
+import br.com.walkflix.Model.DTO.ImageDTO;
 import br.com.walkflix.Service.Image.ImageService;
 import br.com.walkflix.Service.Series.SeriesService;
 import jakarta.validation.Valid;
@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/series")
@@ -59,8 +61,11 @@ public class SeriesController {
         return seriesService.getSeries(id);
     }
 
-    @GetMapping(path = "/all")
-    public ResponseEntity<ApiResponse> getAllSeries(){
-        return seriesService.getAllSeries();
+    @GetMapping(path = "/filter")
+    public ResponseEntity<ApiResponse> getSeriesWithFilter(@RequestParam(name = "id") int id,
+                                                           @RequestParam(name = "seriesName") String seriesName,
+                                                           @RequestParam(name = "directors")List<Integer> directorsId,
+                                                           @RequestParam(name = "dto") int dto){
+        return seriesService.findSeriesWithFilter(id, seriesName, directorsId, dto);
     }
 }

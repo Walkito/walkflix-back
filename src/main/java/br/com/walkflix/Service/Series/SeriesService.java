@@ -1,15 +1,22 @@
 package br.com.walkflix.Service.Series;
 
+import br.com.walkflix.Config.MapperUtil;
 import br.com.walkflix.Model.ApiResponse;
+import br.com.walkflix.Model.DTO.Series.ActorForSeriesResponseDTO;
+import br.com.walkflix.Model.DTO.Series.SeriesDefaultDTO;
+import br.com.walkflix.Model.Entitie.Actor.Actor;
 import br.com.walkflix.Model.Entitie.Series.Series;
 import br.com.walkflix.Model.Entitie.Series.SeriesRepository;
+import br.com.walkflix.Model.Entitie.Series.SeriesSpecification;
 import br.com.walkflix.Utils.DefaultErroMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,8 +29,10 @@ public class SeriesService {
             return seriesRepository.findById(id).map(series -> {
                 if (option.equals("Poster")){
                     series.setTxPicturePoster(filePath);
-                } else {
+                } else if(option.equals("Banner"))  {
                     series.setTxPictureBanner(filePath);
+                } else {
+                    series.setTxPictureThumbnail(filePath);
                 }
 
                 seriesRepository.save(series);
@@ -110,14 +119,26 @@ public class SeriesService {
         }
     }
 
-    public ResponseEntity<ApiResponse> getAllSeries(){
+    public ResponseEntity<ApiResponse> findSeriesWithFilter(int id, String seriesName, List<Integer> directorsId, int dto){
         try{
-            List<Series> series = seriesRepository.findAll();
+            Specification<Series> spec = SeriesSpecification.filterSeries(id, seriesName, directorsId);
+            List<Series> series = seriesRepository.findAll(spec);
+            List response = new ArrayList<>();
+
+            switch (dto){
+                case 0:
+                    for(Series s : series){
+                        SeriesDefaultDTO seriesDTO = MapperUtil.convertToDTO(s, SeriesDefaultDTO.class);
+                        seriesDTO.setDirector(MapperUtil.convertToDTO(s.getDirector(), ActorForSeriesResponseDTO.class));
+                        response.add(seriesDTO);
+                    }
+                    break;
+            }
 
             if(!series.isEmpty()){
                 return ResponseEntity.ok(new ApiResponse(
                         "Séries encontradas com sucesso!",
-                        series,
+                        response,
                         HttpStatus.OK.value()
                 ));
             } else {
@@ -125,7 +146,7 @@ public class SeriesService {
                         new ApiResponse(
                                 "Não foi possível buscar as séries!",
                                 null,
-                                HttpStatus.OK.value()
+                                HttpStatus.NOT_FOUND.value()
                         )
                 );
             }
@@ -133,4 +154,6 @@ public class SeriesService {
             return DefaultErroMessage.getDefaultError(e);
         }
     }
+
+
 }

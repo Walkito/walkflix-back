@@ -1,4 +1,4 @@
-package br.com.walkflix.Model;
+package br.com.walkflix.Model.DTO;
 
 public class ImageDTO {
     private String imageB64;

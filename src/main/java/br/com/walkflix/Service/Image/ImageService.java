@@ -2,7 +2,7 @@ package br.com.walkflix.Service.Image;
 
 import br.com.walkflix.Config.S3Config;
 import br.com.walkflix.Model.ApiResponse;
-import br.com.walkflix.Model.ImageDTO;
+import br.com.walkflix.Model.DTO.ImageDTO;
 import br.com.walkflix.Utils.DefaultErroMessage;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,6 +16,8 @@ import software.amazon.awssdk.services.s3.model.*;
 
 import java.nio.ByteBuffer;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class ImageService {
@@ -89,12 +91,23 @@ public class ImageService {
     }
 
     private RequestBody transformFile(ImageDTO image) {
-        ByteBuffer byteBuffer = ByteBuffer.wrap(decodeBase64(image.getImageB64()));
+        byte[] decodedBytes = decodeBase64(image.getImageB64());
+
+        ByteBuffer byteBuffer = ByteBuffer.wrap(decodedBytes);
         return RequestBody.fromByteBuffer(byteBuffer);
     }
 
     private byte[] decodeBase64(String imageInBase64) {
-        return Base64.getMimeDecoder().decode(imageInBase64);
+        try {
+            // Verifique se a string contém "data:image/..."
+            if (imageInBase64.startsWith("data:image")) {
+                imageInBase64 = imageInBase64.substring(imageInBase64.indexOf(",") + 1); // Remove o cabeçalho
+            }
+
+            return Base64.getDecoder().decode(imageInBase64);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Erro ao decodificar Base64: " + e.getMessage());
+        }
     }
 
     public boolean checkExistingFile(String path) {

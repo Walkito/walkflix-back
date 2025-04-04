@@ -2,7 +2,7 @@ package br.com.walkflix.Controller.Series.Episode;
 
 import br.com.walkflix.Model.ApiResponse;
 import br.com.walkflix.Model.Entitie.Series.Episode.Episode;
-import br.com.walkflix.Model.ImageDTO;
+import br.com.walkflix.Model.DTO.ImageDTO;
 import br.com.walkflix.Service.Image.ImageService;
 import br.com.walkflix.Service.Series.Episode.EpisodeService;
 import jakarta.validation.Valid;

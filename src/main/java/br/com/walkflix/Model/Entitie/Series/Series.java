@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
@@ -27,13 +28,11 @@ public class Series {
     @Size(max = 80, message = "Nome da Série deve conter no máximo 80 caracteres")
     private String txSeriesName;
 
-    @Column(length = 50, nullable = false)
-    @NotBlank(message = "Nome do Diretor é obrigatório!")
-    @Size(max = 50, message = "Nome do Diretor deve ter no máximo 50 caracteres.")
-    private String txDirectorName;
+    @ManyToOne
+    @NotNull(message = "A Série precisa ter um diretor.")
+    private Actor director;
 
     @Column(columnDefinition = "TEXT")
-    @NotBlank(message = "Arte de Poster deve ser obrigatória.")
     private String txPicturePoster;
 
     @Column(length = 3)
@@ -42,6 +41,12 @@ public class Series {
     @Column
     private LocalDate dtLaunch;
 
+    @Column
+    private LocalDate dtClosure;
+
+    @Column
+    private boolean tpActive;
+
     @Column(length = 2)
     private int nuAgeClassification;
 
@@ -49,8 +54,13 @@ public class Series {
     private String txResume;
 
     @Column(columnDefinition = "TEXT")
-    @NotBlank(message = "Arte do Banner deve ser obrigatória.")
+    private String txDescription;
+
+    @Column(columnDefinition = "TEXT")
     private String txPictureBanner;
+
+    @Column(columnDefinition = "TEXT")
+    private String txPictureThumbnail;
 
     @OneToMany(mappedBy = "firstSeries")
     private List<Actor> actorsFirstSeries = new ArrayList<>();
@@ -69,6 +79,46 @@ public class Series {
     public Series() {
     }
 
+    public boolean isTpActive() {
+        return tpActive;
+    }
+
+    public void setTpActive(boolean tpActive) {
+        this.tpActive = tpActive;
+    }
+
+    public LocalDate getDtClosure() {
+        return dtClosure;
+    }
+
+    public void setDtClosure(LocalDate dtClosure) {
+        this.dtClosure = dtClosure;
+    }
+
+    public String getTxPictureThumbnail() {
+        return txPictureThumbnail;
+    }
+
+    public void setTxPictureThumbnail(String txPictureThumbnail) {
+        this.txPictureThumbnail = txPictureThumbnail;
+    }
+
+    public String getTxDescription() {
+        return txDescription;
+    }
+
+    public void setTxDescription(String txDescription) {
+        this.txDescription = txDescription;
+    }
+
+    public Actor getDirector() {
+        return director;
+    }
+
+    public void setDirector(Actor director) {
+        this.director = director;
+    }
+
     public String getTxPicturePoster() {
         return txPicturePoster;
     }
@@ -83,14 +133,6 @@ public class Series {
 
     public void setTxPictureBanner(String txPictureBanner) {
         this.txPictureBanner = txPictureBanner;
-    }
-
-    public String getTxDirectorName() {
-        return txDirectorName;
-    }
-
-    public void setTxDirectorName(String txDirectorName) {
-        this.txDirectorName = txDirectorName;
     }
 
     public List<Episode> getEpisodes() {

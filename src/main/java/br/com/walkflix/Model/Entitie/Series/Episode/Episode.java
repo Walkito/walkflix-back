@@ -26,14 +26,16 @@ public class Episode {
     @Column(columnDefinition = "TEXT")
     private String txResume;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String txEpisodePicture;
 
     @Column
     private LocalDate dtRelease;
 
-    @Column
-    private String txDuration;
+    @Column(length = 3, nullable = false)
+    @Min(value = 1, message = "Número do episódio deve ser entreo 0 e 100")
+    @Max(value = 999, message = "Número do episódio deve ser entreo 0 e 100")
+    private int nuDuration;
 
     @ManyToOne(optional = false)
     @NotNull(message = "Episódio deve estar vínculado com alguma série.")
@@ -66,12 +68,12 @@ public class Episode {
         this.dtRelease = dtRelease;
     }
 
-    public String getTxDuration() {
-        return txDuration;
+    public int getNuDuration() {
+        return nuDuration;
     }
 
-    public void setTxDuration(String txDuration) {
-        this.txDuration = txDuration;
+    public void setNuDuration(int nuDuration) {
+        this.nuDuration = nuDuration;
     }
 
     public int getId() {

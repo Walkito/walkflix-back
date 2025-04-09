@@ -55,6 +55,8 @@ public class ImageService {
 
     public ResponseEntity<?> downloadFile(String path) {
         try {
+            path = path.isEmpty() || path.isBlank() ? "caminhoInexistente" : path;
+
             ResponseInputStream<GetObjectResponse> s3Object = s3Client.getObject(
                     GetObjectRequest.builder()
                             .bucket(s3Config.getBucketName())
@@ -68,6 +70,12 @@ public class ImageService {
             headers.setContentType(MediaType.parseMediaType(s3Object.response().contentType()));
 
             return ResponseEntity.ok().headers(headers).body(content);
+        } catch (NoSuchKeyException ex){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
+                    "Não foi possível buscar a imagem: Caminho não encontrado.",
+                    null,
+                    HttpStatus.NOT_FOUND.value()
+            ));
         } catch (Exception e) {
             return DefaultErroMessage.getDefaultError(e);
         }

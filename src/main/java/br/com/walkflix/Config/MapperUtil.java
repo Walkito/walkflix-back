@@ -11,7 +11,7 @@ public class MapperUtil {
         return new ModelMapper();
     }
 
-    public static <T> T convertToDTO(Object newObj, Class<T> dtoClass){
+    public static <T> T convert(Object newObj, Class<T> dtoClass){
         return new ModelMapper().map(newObj, dtoClass);
     }
 }

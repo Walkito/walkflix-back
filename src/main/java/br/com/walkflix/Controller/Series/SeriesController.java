@@ -1,6 +1,7 @@
 package br.com.walkflix.Controller.Series;
 
 import br.com.walkflix.Model.ApiResponse;
+import br.com.walkflix.Model.DTO.Series.SeriesDTO;
 import br.com.walkflix.Model.Entitie.Series.Series;
 import br.com.walkflix.Model.DTO.ImageDTO;
 import br.com.walkflix.Service.Image.ImageService;
@@ -41,13 +42,13 @@ public class SeriesController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse> createSeries(@RequestBody @Valid Series series){
+    public ResponseEntity<ApiResponse> createSeries(@RequestBody @Valid SeriesDTO series){
         return seriesService.createSeries(series);
     }
 
     @PutMapping
     public ResponseEntity<ApiResponse> editSeries(@RequestParam(name = "id") int id,
-                                                  @RequestBody @Valid Series series){
+                                                  @RequestBody @Valid SeriesDTO series){
         return seriesService.editSeries(id, series);
     }
 
@@ -64,8 +65,7 @@ public class SeriesController {
     @GetMapping(path = "/filter")
     public ResponseEntity<ApiResponse> getSeriesWithFilter(@RequestParam(name = "id") int id,
                                                            @RequestParam(name = "seriesName") String seriesName,
-                                                           @RequestParam(name = "directors")List<Integer> directorsId,
-                                                           @RequestParam(name = "dto") int dto){
-        return seriesService.findSeriesWithFilter(id, seriesName, directorsId, dto);
+                                                           @RequestParam(name = "directors")List<Integer> directorsId){
+        return seriesService.findSeriesWithFilter(id, seriesName, directorsId);
     }
 }

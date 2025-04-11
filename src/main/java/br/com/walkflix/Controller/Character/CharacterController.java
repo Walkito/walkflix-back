@@ -1,6 +1,7 @@
 package br.com.walkflix.Controller.Character;
 
 import br.com.walkflix.Model.ApiResponse;
+import br.com.walkflix.Model.DTO.Character.CharacterDTO;
 import br.com.walkflix.Model.Entitie.Character.Character;
 import br.com.walkflix.Model.DTO.ImageDTO;
 import br.com.walkflix.Service.Character.CharacterService;
@@ -38,14 +39,14 @@ public class CharacterController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse> createCharacter(@RequestBody @Valid Character character){
-        return characterService.createCharacter(character);
+    public ResponseEntity<ApiResponse> createCharacter(@RequestBody @Valid CharacterDTO characterDTO){
+        return characterService.createCharacter(characterDTO);
     }
 
     @PutMapping
     public ResponseEntity<ApiResponse> editCharacter(@RequestParam(name = "id") int id,
-                                                     @RequestBody @Valid Character character){
-        return characterService.editCharacter(id, character);
+                                                     @RequestBody @Valid CharacterDTO characterDTO){
+        return characterService.editCharacter(id, characterDTO);
     }
 
     @DeleteMapping

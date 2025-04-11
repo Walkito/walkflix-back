@@ -1,6 +1,7 @@
 package br.com.walkflix.Controller.Actor;
 
 import br.com.walkflix.Model.ApiResponse;
+import br.com.walkflix.Model.DTO.Actor.ActorDTO;
 import br.com.walkflix.Model.Entitie.Actor.Actor;
 import br.com.walkflix.Model.DTO.ImageDTO;
 import br.com.walkflix.Service.Actor.ActorService;
@@ -40,14 +41,14 @@ public class ActorController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse> createActor(@RequestBody @Valid Actor actor){
-        return actorService.createActor(actor);
+    public ResponseEntity<ApiResponse> createActor(@RequestBody @Valid ActorDTO actorDTO){
+        return actorService.createActor(actorDTO);
     }
 
     @PutMapping
     public ResponseEntity<ApiResponse> editActor(@RequestParam(name = "id") int id,
-                                                 @RequestBody @Valid Actor actor){
-        return actorService.editActor(id, actor);
+                                                 @RequestBody @Valid ActorDTO actorDTO){
+        return actorService.editActor(id, actorDTO);
     }
 
     @DeleteMapping
@@ -63,5 +64,13 @@ public class ActorController {
     @GetMapping(path = "/all")
     public ResponseEntity<ApiResponse> getAllActor(){
         return actorService.getAllActors();
+    }
+
+    @GetMapping(path = "/directors")
+    public ResponseEntity<ApiResponse> getAllDirectors() { return actorService.getAllDirectors(); }
+
+    @GetMapping(path = "/director")
+    public ResponseEntity<ApiResponse> getDirectorBySerie(@RequestParam(name = "serieId") int serieId) {
+        return actorService.getDirectorBySerie(serieId);
     }
 }

@@ -1,8 +1,12 @@
 package br.com.walkflix.Service.Series.Episode;
 
+import br.com.walkflix.Config.MapperUtil;
 import br.com.walkflix.Model.ApiResponse;
+import br.com.walkflix.Model.DTO.Series.Episode.EpisodeDTO;
 import br.com.walkflix.Model.Entitie.Series.Episode.Episode;
 import br.com.walkflix.Model.Entitie.Series.Episode.EpisodeRepository;
+import br.com.walkflix.Model.Entitie.Series.Series;
+import br.com.walkflix.Model.Entitie.Series.SeriesRepository;
 import br.com.walkflix.Utils.DefaultErroMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,21 +15,25 @@ import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class EpisodeService {
     @Autowired
     private EpisodeRepository episodeRepository;
 
-    public ResponseEntity<ApiResponse> saveFilePath(int id, String filePath){
-        try{
+    @Autowired
+    private SeriesRepository seriesRepository;
+
+    public ResponseEntity<ApiResponse> saveFilePath(int id, String filePath) {
+        try {
             return episodeRepository.findById(id).map(episode -> {
                 episode.setTxEpisodePicture(filePath);
                 episodeRepository.save(episode);
 
                 return ResponseEntity.ok(new ApiResponse(
                         "Arquivo salvo com sucesso!",
-                        episode,
+                        MapperUtil.convert(episode, EpisodeDTO.class),
                         HttpStatus.OK.value()
                 ));
             }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
@@ -33,17 +41,22 @@ public class EpisodeService {
                     null,
                     HttpStatus.NOT_FOUND.value()
             )));
-        } catch(Exception e){
+        } catch (Exception e) {
             return DefaultErroMessage.getDefaultError(e);
         }
     }
 
-    public ResponseEntity<ApiResponse> createEpisode(Episode episode) {
+    public ResponseEntity<ApiResponse> createEpisode(EpisodeDTO episodeDTO) {
         try {
+            Episode episode = MapperUtil.convert(episodeDTO, Episode.class);
+            Series series = seriesRepository.getReferenceById(episodeDTO.getIdSeries());
+            episode.setSeries(series);
+            EpisodeDTO episodeResponse = MapperUtil.convert(episodeRepository.save(episode), EpisodeDTO.class);
+
             return ResponseEntity.created(URI.create("/episode")).body(
                     new ApiResponse(
                             "Episódio criado com sucesso!",
-                            episodeRepository.save(episode),
+                            episodeResponse,
                             HttpStatus.CREATED.value()
                     )
             );
@@ -52,13 +65,15 @@ public class EpisodeService {
         }
     }
 
-    public ResponseEntity<ApiResponse> editEpisode(int id, Episode episode) {
+    public ResponseEntity<ApiResponse> editEpisode(int id, EpisodeDTO episodeDTO) {
         try {
-            episode.setId(id);
+            episodeDTO.setId(id);
+            Episode episode = MapperUtil.convert(episodeDTO, Episode.class);
+            EpisodeDTO episodeResponse = MapperUtil.convert(episodeRepository.save(episode), EpisodeDTO.class);
 
             return ResponseEntity.ok(new ApiResponse(
                     "Episódio editado com sucesos!",
-                    episodeRepository.save(episode),
+                    episodeResponse,
                     HttpStatus.OK.value()
             ));
         } catch (Exception e) {
@@ -91,13 +106,11 @@ public class EpisodeService {
     public ResponseEntity<ApiResponse> getEpisode(int id) {
         try {
             return episodeRepository.findById(id).map(
-                    episode -> {
-                        return ResponseEntity.ok(new ApiResponse(
-                                "Episódio encontrado com sucesso!",
-                                episode,
-                                HttpStatus.OK.value()
-                        ));
-                    }
+                    episode -> ResponseEntity.ok(new ApiResponse(
+                            "Episódio encontrado com sucesso!",
+                            MapperUtil.convert(episode, EpisodeDTO.class),
+                            HttpStatus.OK.value()
+                    ))
             ).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
                     "Episódio não econtrado.",
                     null,
@@ -110,12 +123,15 @@ public class EpisodeService {
 
     public ResponseEntity<ApiResponse> getAllSeriesEpisode(int idSeries) {
         try {
-            List<Episode> episodes = episodeRepository.findAllBySeriesId(idSeries);
+            List<EpisodeDTO> episodesDTOs = episodeRepository.findAllBySeriesId(idSeries)
+                    .stream()
+                    .map(episode -> MapperUtil.convert(episode, EpisodeDTO.class))
+                    .toList();
 
-            if (!episodes.isEmpty()) {
+            if (!episodesDTOs.isEmpty()) {
                 return ResponseEntity.ok(new ApiResponse(
                         "Episódios encontrados com sucesso!",
-                        episodes,
+                        episodesDTOs,
                         HttpStatus.OK.value()
                 ));
             } else {

@@ -1,6 +1,8 @@
 package br.com.walkflix.Model.Entitie.Series.Episode;
 
 import br.com.walkflix.Model.Entitie.Series.Series;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
@@ -8,6 +10,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "episodes")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Episode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

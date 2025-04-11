@@ -1,11 +1,9 @@
-package br.com.walkflix.Model.DTO.Series;
+package br.com.walkflix.Model.DTO.Actor;
 
 import br.com.walkflix.Model.Enum.ActorStatus.ActorStatus;
-
 import java.time.LocalDate;
 
-public class ActorForSeriesResponseDTO {
-
+public class ActorDTO {
     private int id;
 
     private String txActorName;
@@ -22,7 +20,17 @@ public class ActorForSeriesResponseDTO {
 
     private String txBiography;
 
-    public ActorForSeriesResponseDTO() {
+    private int idFirstSeries;
+
+    public ActorDTO() {
+    }
+
+    public int getIdFirstSeries() {
+        return idFirstSeries;
+    }
+
+    public void setIdFirstSeries(int idFirstSeries) {
+        this.idFirstSeries = idFirstSeries;
     }
 
     public int getId() {

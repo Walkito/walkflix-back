@@ -1,9 +1,14 @@
 package br.com.walkflix.Service.Actor;
 
+import br.com.walkflix.Config.MapperUtil;
 import br.com.walkflix.Model.ApiResponse;
+import br.com.walkflix.Model.DTO.Actor.ActorDTO;
 import br.com.walkflix.Model.Entitie.Actor.Actor;
 import br.com.walkflix.Model.Entitie.Actor.ActorRepository;
+import br.com.walkflix.Model.Entitie.Series.Series;
+import br.com.walkflix.Model.Entitie.Series.SeriesRepository;
 import br.com.walkflix.Utils.DefaultErroMessage;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +24,9 @@ import java.util.Optional;
 public class ActorService {
     @Autowired
     private ActorRepository actorRepository;
+
+    @Autowired
+    private SeriesRepository seriesRepository;
 
     public ResponseEntity<ApiResponse> saveFilePath(int id, String filePath){
         try{
@@ -41,11 +49,15 @@ public class ActorService {
         }
     }
 
-    public ResponseEntity<ApiResponse> createActor(Actor actor) {
+    public ResponseEntity<ApiResponse> createActor(ActorDTO actorDTO) {
         try {
+            Actor actor = MapperUtil.convert(actorDTO, Actor.class);
+            Series firstSeries = seriesRepository.getReferenceById(actorDTO.getIdFirstSeries());
+            actor.setFirstSeries(firstSeries);
+
             return ResponseEntity.created(URI.create("/actors")).body(new ApiResponse(
                     "Ator registrado com sucesso!",
-                    actorRepository.save(actor),
+                    MapperUtil.convert(actorRepository.save(actor), ActorDTO.class),
                     HttpStatus.CREATED.value()
             ));
         } catch (Exception e) {
@@ -53,13 +65,14 @@ public class ActorService {
         }
     }
 
-    public ResponseEntity<ApiResponse> editActor(int idActor, Actor editedActor) {
+    public ResponseEntity<ApiResponse> editActor(int idActor, ActorDTO actorDTO) {
         try {
-            editedActor.setId(idActor);
+            Actor actor = MapperUtil.convert(actorDTO, Actor.class);
+            actor.setId(idActor);
 
             return ResponseEntity.ok(new ApiResponse(
                     "Ator editado com sucesso!",
-                    actorRepository.save(editedActor),
+                    MapperUtil.convert(actorRepository.save(actor), ActorDTO.class),
                     HttpStatus.OK.value()
             ));
         } catch (Exception e) {
@@ -101,7 +114,7 @@ public class ActorService {
 
             return actor.map(value -> ResponseEntity.ok().body(new ApiResponse(
                     "Ator retornado com sucesso!",
-                    value,
+                    MapperUtil.convert(value, ActorDTO.class),
                     HttpStatus.OK.value()
             ))).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     new ApiResponse(
@@ -120,7 +133,7 @@ public class ActorService {
 
             return !actors.isEmpty() ? ResponseEntity.ok(new ApiResponse(
                     "Atores e/ou Atrizes encontrados com sucesso.",
-                    actors,
+                    actors.stream().map(actor -> MapperUtil.convert(actor, ActorDTO.class)).toList(),
                     HttpStatus.OK.value()
             )) : ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
                     "Não foi possível encontrar nenhum ator/atriz.",
@@ -132,5 +145,39 @@ public class ActorService {
         }
     }
 
+    public ResponseEntity<ApiResponse> getAllDirectors(){
+        try{
+            List<Actor> directors = seriesRepository.findAllDirectorsFromSeries();
 
+            return !directors.isEmpty() ? ResponseEntity.ok(new ApiResponse(
+                    "Diretores encontrados com sucesso.",
+                    directors.stream().map(director -> MapperUtil.convert(director, ActorDTO.class)).toList(),
+                    HttpStatus.OK.value()
+            )) : ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
+                    "Não foi possível encontrar nenhum diretor/diretora",
+                    null,
+                    HttpStatus.NOT_FOUND.value()
+            ));
+        } catch(Exception e){
+            return DefaultErroMessage.getDefaultError(e);
+        }
+    }
+
+    public ResponseEntity<ApiResponse> getDirectorBySerie(int seriesId){
+        try{
+            Optional<Actor> director = seriesRepository.findDirectorById(seriesId);
+
+            return director.isPresent() ? ResponseEntity.ok(new ApiResponse(
+                    "Diretor(a) encontrado(a) com sucesso.",
+                    director.map(d -> MapperUtil.convert(d, ActorDTO.class)),
+                    HttpStatus.OK.value()
+            )) : ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
+                    "Não foi possível encontrar nenhum diretor(a)",
+                    null,
+                    HttpStatus.NOT_FOUND.value()
+            ));
+        } catch(Exception e){
+            return DefaultErroMessage.getDefaultError(e);
+        }
+    }
 }

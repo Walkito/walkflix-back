@@ -1,6 +1,10 @@
 package br.com.walkflix.Service.Character;
 
+import br.com.walkflix.Config.MapperUtil;
 import br.com.walkflix.Model.ApiResponse;
+import br.com.walkflix.Model.DTO.Character.CharacterDTO;
+import br.com.walkflix.Model.Entitie.Actor.Actor;
+import br.com.walkflix.Model.Entitie.Actor.ActorRepository;
 import br.com.walkflix.Model.Entitie.Character.Character;
 import br.com.walkflix.Model.Entitie.Character.CharacterRepository;
 import br.com.walkflix.Utils.DefaultErroMessage;
@@ -17,6 +21,9 @@ import java.util.Optional;
 public class CharacterService {
     @Autowired
     private CharacterRepository characterRepository;
+
+    @Autowired
+    private ActorRepository actorRepository;
 
     public ResponseEntity<ApiResponse> saveFilePath(int id, String filePath){
         try{
@@ -39,11 +46,15 @@ public class CharacterService {
         }
     }
 
-    public ResponseEntity<ApiResponse> createCharacter(Character character) {
+    public ResponseEntity<ApiResponse> createCharacter(CharacterDTO characterDTO) {
         try {
+            Character character = MapperUtil.convert(characterDTO, Character.class);
+            Actor actor = actorRepository.getReferenceById(characterDTO.getIdActor());
+            character.setActor(actor);
+
             return ResponseEntity.created(URI.create("/character")).body(new ApiResponse(
                     "Personagem criado com sucesso.",
-                    characterRepository.save(character),
+                    MapperUtil.convert(characterRepository.save(character), CharacterDTO.class),
                     HttpStatus.CREATED.value()
             ));
         } catch (Exception e) {
@@ -51,14 +62,15 @@ public class CharacterService {
         }
     }
 
-    public ResponseEntity<ApiResponse> editCharacter(int idCharacter, Character character) {
+    public ResponseEntity<ApiResponse> editCharacter(int idCharacter, CharacterDTO characterDTO) {
         try {
+            Character character = MapperUtil.convert(characterDTO, Character.class);
             character.setId(idCharacter);
 
             return ResponseEntity.ok(
                     new ApiResponse(
                             "Personagem editado com sucesso.",
-                            characterRepository.save(character),
+                            MapperUtil.convert(characterRepository.save(character), CharacterDTO.class),
                             HttpStatus.OK.value()
                     )
             );
@@ -106,7 +118,7 @@ public class CharacterService {
 
             return character.map(value -> ResponseEntity.ok().body(new ApiResponse(
                     "Personagem encontrado",
-                    value,
+                    MapperUtil.convert(value, CharacterDTO.class),
                     HttpStatus.OK.value()
             ))).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
                     "Personagem não encontrado.",
@@ -124,7 +136,7 @@ public class CharacterService {
 
             return !characters.isEmpty() ? ResponseEntity.ok().body(new ApiResponse(
                     "Personagems encontrados.",
-                    characters,
+                    characters.stream().map(character -> MapperUtil.convert(characters, CharacterDTO.class)).toList(),
                     HttpStatus.OK.value()
             )) : ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
                     "Nenhum personagem encontrado para esta série.",

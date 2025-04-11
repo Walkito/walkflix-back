@@ -2,9 +2,9 @@ package br.com.walkflix.Service.Series;
 
 import br.com.walkflix.Config.MapperUtil;
 import br.com.walkflix.Model.ApiResponse;
-import br.com.walkflix.Model.DTO.Series.ActorForSeriesResponseDTO;
-import br.com.walkflix.Model.DTO.Series.SeriesDefaultDTO;
+import br.com.walkflix.Model.DTO.Series.SeriesDTO;
 import br.com.walkflix.Model.Entitie.Actor.Actor;
+import br.com.walkflix.Model.Entitie.Actor.ActorRepository;
 import br.com.walkflix.Model.Entitie.Series.Series;
 import br.com.walkflix.Model.Entitie.Series.SeriesRepository;
 import br.com.walkflix.Model.Entitie.Series.SeriesSpecification;
@@ -24,12 +24,15 @@ public class SeriesService {
     @Autowired
     private SeriesRepository seriesRepository;
 
-    public ResponseEntity<ApiResponse> saveFilePath(int id, String filePath, String option){
-        try{
+    @Autowired
+    private ActorRepository actorRepository;
+
+    public ResponseEntity<ApiResponse> saveFilePath(int id, String filePath, String option) {
+        try {
             return seriesRepository.findById(id).map(series -> {
-                if (option.equals("Poster")){
+                if (option.equals("Poster")) {
                     series.setTxPicturePoster(filePath);
-                } else if(option.equals("Banner"))  {
+                } else if (option.equals("Banner")) {
                     series.setTxPictureBanner(filePath);
                 } else {
                     series.setTxPictureThumbnail(filePath);
@@ -47,16 +50,20 @@ public class SeriesService {
                     null,
                     HttpStatus.NOT_FOUND.value()
             )));
-        } catch(Exception e){
+        } catch (Exception e) {
             return DefaultErroMessage.getDefaultError(e);
         }
     }
 
-    public ResponseEntity<ApiResponse> createSeries(Series series) {
+    public ResponseEntity<ApiResponse> createSeries(SeriesDTO seriesDTO) {
         try {
+            Series series = MapperUtil.convert(seriesDTO, Series.class);
+            seriesRepository.save(series);
+
+            SeriesDTO newSeries = MapperUtil.convert(series, SeriesDTO.class);
             return ResponseEntity.created(URI.create("/series")).body(new ApiResponse(
                     "Série criada com sucesso.",
-                    seriesRepository.save(series),
+                    newSeries,
                     HttpStatus.OK.value()
             ));
         } catch (Exception e) {
@@ -64,13 +71,16 @@ public class SeriesService {
         }
     }
 
-    public ResponseEntity<ApiResponse> editSeries(int id, Series series) {
+    public ResponseEntity<ApiResponse> editSeries(int id, SeriesDTO seriesDTO) {
         try {
-            series.setId(id);
+            seriesDTO.setId(id);
+
+            Series series = MapperUtil.convert(seriesDTO, Series.class);
+            SeriesDTO seriesResponse = MapperUtil.convert(seriesRepository.save(series), SeriesDTO.class);
 
             return ResponseEntity.ok(new ApiResponse(
                     "Série editada com sucesso.",
-                    seriesRepository.save(series),
+                    seriesResponse,
                     HttpStatus.OK.value()
             ));
         } catch (Exception e) {
@@ -103,13 +113,11 @@ public class SeriesService {
     public ResponseEntity<ApiResponse> getSeries(int id) {
         try {
             return seriesRepository.findById(id).map(
-                    series -> {
-                        return ResponseEntity.ok(new ApiResponse(
+                    series -> ResponseEntity.ok(new ApiResponse(
                                 "Série encontrada com sucesso!",
-                                series,
+                                MapperUtil.convert(series, SeriesDTO.class),
                                 HttpStatus.OK.value()
-                        ));
-                    }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
+                        ))).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
                     "Série não encontrada!",
                     null,
                     HttpStatus.NOT_FOUND.value()
@@ -119,26 +127,16 @@ public class SeriesService {
         }
     }
 
-    public ResponseEntity<ApiResponse> findSeriesWithFilter(int id, String seriesName, List<Integer> directorsId, int dto){
-        try{
+    public ResponseEntity<ApiResponse> findSeriesWithFilter(int id, String seriesName, List<Integer> directorsId) {
+        try {
             Specification<Series> spec = SeriesSpecification.filterSeries(id, seriesName, directorsId);
             List<Series> series = seriesRepository.findAll(spec);
-            List response = new ArrayList<>();
+            List<SeriesDTO> seriesResponse = series.stream().map(s -> MapperUtil.convert(s, SeriesDTO.class)).toList();
 
-            switch (dto){
-                case 0:
-                    for(Series s : series){
-                        SeriesDefaultDTO seriesDTO = MapperUtil.convertToDTO(s, SeriesDefaultDTO.class);
-                        seriesDTO.setDirector(MapperUtil.convertToDTO(s.getDirector(), ActorForSeriesResponseDTO.class));
-                        response.add(seriesDTO);
-                    }
-                    break;
-            }
-
-            if(!series.isEmpty()){
+            if (!series.isEmpty()) {
                 return ResponseEntity.ok(new ApiResponse(
                         "Séries encontradas com sucesso!",
-                        response,
+                        seriesResponse,
                         HttpStatus.OK.value()
                 ));
             } else {
@@ -150,10 +148,8 @@ public class SeriesService {
                         )
                 );
             }
-        } catch(Exception e){
+        } catch (Exception e) {
             return DefaultErroMessage.getDefaultError(e);
         }
     }
-
-
 }

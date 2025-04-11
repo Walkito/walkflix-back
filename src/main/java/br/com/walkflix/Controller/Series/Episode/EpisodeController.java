@@ -1,6 +1,7 @@
 package br.com.walkflix.Controller.Series.Episode;
 
 import br.com.walkflix.Model.ApiResponse;
+import br.com.walkflix.Model.DTO.Series.Episode.EpisodeDTO;
 import br.com.walkflix.Model.Entitie.Series.Episode.Episode;
 import br.com.walkflix.Model.DTO.ImageDTO;
 import br.com.walkflix.Service.Image.ImageService;
@@ -38,14 +39,14 @@ public class EpisodeController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse> createEpisode(@RequestBody @Valid Episode episode){
-        return episodeService.createEpisode(episode);
+    public ResponseEntity<ApiResponse> createEpisode(@RequestBody @Valid EpisodeDTO episodeDTO){
+        return episodeService.createEpisode(episodeDTO);
     }
 
     @PutMapping
     public ResponseEntity<ApiResponse> editEpisode(@RequestParam(name = "id") int id,
-                                                   @RequestBody @Valid Episode episode){
-        return  episodeService.editEpisode(id, episode);
+                                                   @RequestBody @Valid EpisodeDTO episodeDTO){
+        return  episodeService.editEpisode(id, episodeDTO);
     }
 
     @DeleteMapping

@@ -1,23 +1,13 @@
 package br.com.walkflix.Model.DTO.Series;
 
-import br.com.walkflix.Model.Entitie.Actor.Actor;
-import br.com.walkflix.Model.Entitie.Character.Character;
-import br.com.walkflix.Model.Entitie.Series.Episode.Episode;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import br.com.walkflix.Model.DTO.Actor.ActorDTO;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
-public class SeriesDefaultDTO {
+public class SeriesDTO {
     private int id;
 
     private String txSeriesName;
-
-    private ActorForSeriesResponseDTO director;
 
     private String txPicturePoster;
 
@@ -39,7 +29,17 @@ public class SeriesDefaultDTO {
 
     private String txPictureThumbnail;
 
-    public SeriesDefaultDTO() {
+    private ActorDTO director;
+
+    public SeriesDTO() {
+    }
+
+    public ActorDTO getDirector() {
+        return director;
+    }
+
+    public void setDirector(ActorDTO director) {
+        this.director = director;
     }
 
     public int getId() {
@@ -56,14 +56,6 @@ public class SeriesDefaultDTO {
 
     public void setTxSeriesName(String txSeriesName) {
         this.txSeriesName = txSeriesName;
-    }
-
-    public ActorForSeriesResponseDTO getDirector() {
-        return director;
-    }
-
-    public void setDirector(ActorForSeriesResponseDTO director) {
-        this.director = director;
     }
 
     public String getTxPicturePoster() {

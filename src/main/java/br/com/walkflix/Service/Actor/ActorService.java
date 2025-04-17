@@ -5,16 +5,15 @@ import br.com.walkflix.Model.ApiResponse;
 import br.com.walkflix.Model.DTO.Actor.ActorDTO;
 import br.com.walkflix.Model.Entitie.Actor.Actor;
 import br.com.walkflix.Model.Entitie.Actor.ActorRepository;
+import br.com.walkflix.Model.Entitie.Actor.ActorSpecification;
 import br.com.walkflix.Model.Entitie.Series.Series;
 import br.com.walkflix.Model.Entitie.Series.SeriesRepository;
 import br.com.walkflix.Utils.DefaultErroMessage;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.net.URI;
 import java.util.List;
@@ -28,8 +27,8 @@ public class ActorService {
     @Autowired
     private SeriesRepository seriesRepository;
 
-    public ResponseEntity<ApiResponse> saveFilePath(int id, String filePath){
-        try{
+    public ResponseEntity<ApiResponse> saveFilePath(int id, String filePath) {
+        try {
             return actorRepository.findById(id).map(actor -> {
                 actor.setTxProfilePicture(filePath);
                 actorRepository.save(actor);
@@ -44,7 +43,7 @@ public class ActorService {
                     null,
                     HttpStatus.NOT_FOUND.value()
             )));
-        } catch(Exception e){
+        } catch (Exception e) {
             return DefaultErroMessage.getDefaultError(e);
         }
     }
@@ -52,8 +51,6 @@ public class ActorService {
     public ResponseEntity<ApiResponse> createActor(ActorDTO actorDTO) {
         try {
             Actor actor = MapperUtil.convert(actorDTO, Actor.class);
-            Series firstSeries = seriesRepository.getReferenceById(actorDTO.getIdFirstSeries());
-            actor.setFirstSeries(firstSeries);
 
             return ResponseEntity.created(URI.create("/actors")).body(new ApiResponse(
                     "Ator registrado com sucesso!",
@@ -145,8 +142,8 @@ public class ActorService {
         }
     }
 
-    public ResponseEntity<ApiResponse> getAllDirectors(){
-        try{
+    public ResponseEntity<ApiResponse> getAllDirectors() {
+        try {
             List<Actor> directors = seriesRepository.findAllDirectorsFromSeries();
 
             return !directors.isEmpty() ? ResponseEntity.ok(new ApiResponse(
@@ -158,13 +155,39 @@ public class ActorService {
                     null,
                     HttpStatus.NOT_FOUND.value()
             ));
-        } catch(Exception e){
+        } catch (Exception e) {
             return DefaultErroMessage.getDefaultError(e);
         }
     }
 
-    public ResponseEntity<ApiResponse> getDirectorBySerie(int seriesId){
-        try{
+    public ResponseEntity<ApiResponse> findActorsWithFilter(int id, String txActorName, List<Integer> seriesId) {
+        try {
+            Specification<Actor> spec = ActorSpecification.filterActor(id, txActorName, seriesId);
+            List<Actor> actors = actorRepository.findAll(spec);
+
+            if (!actors.isEmpty()) {
+                List<ActorDTO> actorDTOS = actors.stream().map(actor -> MapperUtil.convert(actor, ActorDTO.class)).toList();
+
+                return ResponseEntity.ok(new ApiResponse(
+                        "Atores e Atrizes encontrados com sucesso.",
+                        actorDTOS,
+                        HttpStatus.OK.value()
+                ));
+            } else {
+                return ResponseEntity.ok(new ApiResponse(
+                        "Não foram ecnontrados atores e atrizes",
+                        null,
+                        HttpStatus.OK.value()
+                ));
+            }
+
+        } catch (Exception e) {
+            return DefaultErroMessage.getDefaultError(e);
+        }
+    }
+
+    public ResponseEntity<ApiResponse> getDirectorBySerie(int seriesId) {
+        try {
             Optional<Actor> director = seriesRepository.findDirectorById(seriesId);
 
             return director.isPresent() ? ResponseEntity.ok(new ApiResponse(
@@ -176,7 +199,7 @@ public class ActorService {
                     null,
                     HttpStatus.NOT_FOUND.value()
             ));
-        } catch(Exception e){
+        } catch (Exception e) {
             return DefaultErroMessage.getDefaultError(e);
         }
     }

@@ -3,11 +3,11 @@ package br.com.walkflix.Service.Series;
 import br.com.walkflix.Config.MapperUtil;
 import br.com.walkflix.Model.ApiResponse;
 import br.com.walkflix.Model.DTO.Series.SeriesDTO;
-import br.com.walkflix.Model.Entitie.Actor.Actor;
 import br.com.walkflix.Model.Entitie.Actor.ActorRepository;
 import br.com.walkflix.Model.Entitie.Series.Series;
 import br.com.walkflix.Model.Entitie.Series.SeriesRepository;
 import br.com.walkflix.Model.Entitie.Series.SeriesSpecification;
+import br.com.walkflix.Service.Image.ImageService;
 import br.com.walkflix.Utils.DefaultErroMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,14 +26,20 @@ public class SeriesService {
     @Autowired
     private ActorRepository actorRepository;
 
+    @Autowired
+    private ImageService imageService;
+
     public ResponseEntity<ApiResponse> saveFilePath(int id, String filePath, String option) {
         try {
             return seriesRepository.findById(id).map(series -> {
                 if (option.equals("Poster")) {
+                    imageService.deleteFile(series.getTxPicturePoster());
                     series.setTxPicturePoster(filePath);
                 } else if (option.equals("Banner")) {
+                    imageService.deleteFile(series.getTxPictureBanner());
                     series.setTxPictureBanner(filePath);
                 } else {
+                    imageService.deleteFile(series.getTxPictureThumbnail());
                     series.setTxPictureThumbnail(filePath);
                 }
 
@@ -114,10 +119,10 @@ public class SeriesService {
         try {
             return seriesRepository.findById(id).map(
                     series -> ResponseEntity.ok(new ApiResponse(
-                                "Série encontrada com sucesso!",
-                                MapperUtil.convert(series, SeriesDTO.class),
-                                HttpStatus.OK.value()
-                        ))).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
+                            "Série encontrada com sucesso!",
+                            MapperUtil.convert(series, SeriesDTO.class),
+                            HttpStatus.OK.value()
+                    ))).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
                     "Série não encontrada!",
                     null,
                     HttpStatus.NOT_FOUND.value()

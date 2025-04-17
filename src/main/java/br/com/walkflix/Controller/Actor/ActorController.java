@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(path = "/actor")
 @Validated
@@ -64,6 +66,13 @@ public class ActorController {
     @GetMapping(path = "/all")
     public ResponseEntity<ApiResponse> getAllActor(){
         return actorService.getAllActors();
+    }
+
+    @GetMapping(path = "/filter")
+    public ResponseEntity<ApiResponse> findSeriesWithFilter(@RequestParam(name = "id") int id,
+                                                            @RequestParam(name = "txActorName") String txActorName,
+                                                            @RequestParam(name = "series") List<Integer> series){
+        return actorService.findActorsWithFilter(id, txActorName, series);
     }
 
     @GetMapping(path = "/directors")

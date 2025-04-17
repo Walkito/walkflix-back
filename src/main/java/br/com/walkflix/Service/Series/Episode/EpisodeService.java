@@ -7,6 +7,7 @@ import br.com.walkflix.Model.Entitie.Series.Episode.Episode;
 import br.com.walkflix.Model.Entitie.Series.Episode.EpisodeRepository;
 import br.com.walkflix.Model.Entitie.Series.Series;
 import br.com.walkflix.Model.Entitie.Series.SeriesRepository;
+import br.com.walkflix.Service.Image.ImageService;
 import br.com.walkflix.Utils.DefaultErroMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,9 +26,13 @@ public class EpisodeService {
     @Autowired
     private SeriesRepository seriesRepository;
 
+    @Autowired
+    private ImageService imageService;
+
     public ResponseEntity<ApiResponse> saveFilePath(int id, String filePath) {
         try {
             return episodeRepository.findById(id).map(episode -> {
+                imageService.deleteFile(episode.getTxEpisodePicture());
                 episode.setTxEpisodePicture(filePath);
                 episodeRepository.save(episode);
 

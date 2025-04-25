@@ -32,17 +32,27 @@ public class SeriesService {
     public ResponseEntity<ApiResponse> saveFilePath(int id, String filePath, String option) {
         try {
             return seriesRepository.findById(id).map(series -> {
-                if (option.equals("Poster")) {
-                    imageService.deleteFile(series.getTxPicturePoster());
-                    series.setTxPicturePoster(filePath);
-                } else if (option.equals("Banner")) {
-                    imageService.deleteFile(series.getTxPictureBanner());
-                    series.setTxPictureBanner(filePath);
-                } else {
-                    imageService.deleteFile(series.getTxPictureThumbnail());
-                    series.setTxPictureThumbnail(filePath);
+                if(filePath == null || filePath.isEmpty()){
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
+                            "Caminho não encontrado",
+                            null,
+                            HttpStatus.NOT_FOUND.value()
+                    ));
                 }
-
+                switch (option) {
+                    case "Poster":
+                        deleteIfNotEmpty(series.getTxPicturePoster());
+                        series.setTxPicturePoster(filePath);
+                        break;
+                    case "Banner":
+                        deleteIfNotEmpty(series.getTxPictureBanner());
+                        series.setTxPictureBanner(filePath);
+                        break;
+                    case "Thumbnail":
+                        deleteIfNotEmpty(series.getTxPictureThumbnail());
+                        series.setTxPictureThumbnail(filePath);
+                        break;
+                }
                 seriesRepository.save(series);
 
                 return ResponseEntity.ok(new ApiResponse(
@@ -155,6 +165,12 @@ public class SeriesService {
             }
         } catch (Exception e) {
             return DefaultErroMessage.getDefaultError(e);
+        }
+    }
+
+    private void deleteIfNotEmpty(String path) {
+        if (path != null && !path.isEmpty() && !path.isBlank()) {
+            imageService.deleteFile(path);
         }
     }
 }

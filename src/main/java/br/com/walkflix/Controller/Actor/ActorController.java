@@ -2,7 +2,6 @@ package br.com.walkflix.Controller.Actor;
 
 import br.com.walkflix.Model.ApiResponse;
 import br.com.walkflix.Model.DTO.Actor.ActorDTO;
-import br.com.walkflix.Model.Entitie.Actor.Actor;
 import br.com.walkflix.Model.DTO.ImageDTO;
 import br.com.walkflix.Service.Actor.ActorService;
 import br.com.walkflix.Service.Image.ImageService;
@@ -28,10 +27,10 @@ public class ActorController {
     @PostMapping(path = "/upload")
     public ResponseEntity<ApiResponse> uploadActorPicture(@RequestParam(name = "path") String path,
                                                           @RequestParam(name = "id") int id,
-                                                          @RequestBody ImageDTO imageDTO){
+                                                          @RequestBody ImageDTO imageDTO) {
         String filePath = imageService.uploadImage(path, imageDTO);
 
-        if(filePath.isEmpty()){
+        if (filePath.isEmpty()) {
             return ResponseEntity.badRequest().body(new ApiResponse(
                     "Não foi possivel salvar o arquivo: Já existe outro arquivo com este mesmo nome!",
                     null,
@@ -43,43 +42,40 @@ public class ActorController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse> createActor(@RequestBody @Valid ActorDTO actorDTO){
+    public ResponseEntity<ApiResponse> createActor(@RequestBody @Valid ActorDTO actorDTO) {
         return actorService.createActor(actorDTO);
     }
 
     @PutMapping
     public ResponseEntity<ApiResponse> editActor(@RequestParam(name = "id") int id,
-                                                 @RequestBody @Valid ActorDTO actorDTO){
+                                                 @RequestBody @Valid ActorDTO actorDTO) {
         return actorService.editActor(id, actorDTO);
     }
 
     @DeleteMapping
-    public ResponseEntity<ApiResponse> deleteActor(@RequestParam(name = "id") int id){
+    public ResponseEntity<ApiResponse> deleteActor(@RequestParam(name = "id") int id) {
         return actorService.deleteActor(id);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse> getActor(@RequestParam(name = "id") int id){
-        return actorService.getActor(id);
+    public ResponseEntity<ApiResponse> getActor(@RequestParam(name = "id") int id,
+                                                @RequestParam(name = "txActorName") String txActorName,
+                                                @RequestParam(name = "series") List<Integer> series) {
+        return actorService.getActor(id, txActorName, series);
     }
 
     @GetMapping(path = "/all")
-    public ResponseEntity<ApiResponse> getAllActor(){
+    public ResponseEntity<ApiResponse> getAllActor() {
         return actorService.getAllActors();
     }
 
-    @GetMapping(path = "/filter")
-    public ResponseEntity<ApiResponse> findSeriesWithFilter(@RequestParam(name = "id") int id,
-                                                            @RequestParam(name = "txActorName") String txActorName,
-                                                            @RequestParam(name = "series") List<Integer> series){
-        return actorService.findActorsWithFilter(id, txActorName, series);
+    @GetMapping(path = "/directors")
+    public ResponseEntity<ApiResponse> getAllDirectors() {
+        return actorService.getAllDirectors();
     }
 
-    @GetMapping(path = "/directors")
-    public ResponseEntity<ApiResponse> getAllDirectors() { return actorService.getAllDirectors(); }
-
-    @GetMapping(path = "/director")
-    public ResponseEntity<ApiResponse> getDirectorBySerie(@RequestParam(name = "serieId") int serieId) {
-        return actorService.getDirectorBySerie(serieId);
+    @GetMapping(path = "/actorSeries")
+    public ResponseEntity<ApiResponse> getActorSeries(@RequestParam(name = "id") int id) {
+        return actorService.getActorSeries(id);
     }
 }

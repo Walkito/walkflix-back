@@ -22,7 +22,7 @@ public class EpisodeController {
     private ImageService imageService;
 
     @PostMapping(path = "/upload")
-    public ResponseEntity<ApiResponse> uploadActorPicture(@RequestParam(name = "path") String path,
+    public ResponseEntity<ApiResponse> uploadEpisodePicture(@RequestParam(name = "path") String path,
                                                           @RequestParam(name = "id") int id,
                                                           @RequestBody ImageDTO imageDTO){
         String filePath = imageService.uploadImage(path, imageDTO);

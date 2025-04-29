@@ -3,6 +3,7 @@ package br.com.walkflix.Service.Actor;
 import br.com.walkflix.Config.MapperUtil;
 import br.com.walkflix.Model.ApiResponse;
 import br.com.walkflix.Model.DTO.Actor.ActorDTO;
+import br.com.walkflix.Model.DTO.Series.SeriesDTO;
 import br.com.walkflix.Model.Entitie.Actor.Actor;
 import br.com.walkflix.Model.Entitie.Actor.ActorRepository;
 import br.com.walkflix.Model.Entitie.Actor.ActorSpecification;
@@ -165,7 +166,7 @@ public class ActorService {
         }
     }
 
-    public ResponseEntity<ApiResponse> findActorsWithFilter(int id, String txActorName, List<Integer> seriesId) {
+    public ResponseEntity<ApiResponse> getActor(int id, String txActorName, List<Integer> seriesId) {
         try {
             Specification<Actor> spec = ActorSpecification.filterActor(id, txActorName, seriesId);
             List<Actor> actors = actorRepository.findAll(spec);
@@ -191,19 +192,23 @@ public class ActorService {
         }
     }
 
-    public ResponseEntity<ApiResponse> getDirectorBySerie(int seriesId) {
+    public ResponseEntity<ApiResponse> getActorSeries(int actorId) {
         try {
-            Optional<Actor> director = seriesRepository.findDirectorById(seriesId);
+            List<Series> actorSeries = actorRepository.findSeriesByActorId(actorId);
 
-            return director.isPresent() ? ResponseEntity.ok(new ApiResponse(
-                    "Diretor(a) encontrado(a) com sucesso.",
-                    director.map(d -> MapperUtil.convert(d, ActorDTO.class)),
-                    HttpStatus.OK.value()
-            )) : ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
-                    "Não foi possível encontrar nenhum diretor(a)",
+            if (!actorSeries.isEmpty()) {
+                return ResponseEntity.ok().body(new ApiResponse(
+                        "Séries encontradas com sucesso!",
+                        actorSeries.stream().map(serie -> MapperUtil.convert(serie, SeriesDTO.class)).toList(),
+                        HttpStatus.OK.value()
+                ));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
+                    "Não foram encontradas nenhuma série vinculada com este ator/atriz",
                     null,
                     HttpStatus.NOT_FOUND.value()
-            ));
+                ));
+            }
         } catch (Exception e) {
             return DefaultErroMessage.getDefaultError(e);
         }

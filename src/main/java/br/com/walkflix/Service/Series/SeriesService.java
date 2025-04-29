@@ -32,13 +32,6 @@ public class SeriesService {
     public ResponseEntity<ApiResponse> saveFilePath(int id, String filePath, String option) {
         try {
             return seriesRepository.findById(id).map(series -> {
-                if(filePath == null || filePath.isEmpty()){
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
-                            "Caminho não encontrado",
-                            null,
-                            HttpStatus.NOT_FOUND.value()
-                    ));
-                }
                 switch (option) {
                     case "Poster":
                         deleteIfNotEmpty(series.getTxPicturePoster());
@@ -125,24 +118,7 @@ public class SeriesService {
         }
     }
 
-    public ResponseEntity<ApiResponse> getSeries(int id) {
-        try {
-            return seriesRepository.findById(id).map(
-                    series -> ResponseEntity.ok(new ApiResponse(
-                            "Série encontrada com sucesso!",
-                            MapperUtil.convert(series, SeriesDTO.class),
-                            HttpStatus.OK.value()
-                    ))).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
-                    "Série não encontrada!",
-                    null,
-                    HttpStatus.NOT_FOUND.value()
-            )));
-        } catch (Exception e) {
-            return DefaultErroMessage.getDefaultError(e);
-        }
-    }
-
-    public ResponseEntity<ApiResponse> findSeriesWithFilter(int id, String seriesName, List<Integer> directorsId) {
+    public ResponseEntity<ApiResponse> getSeries(int id, String seriesName, List<Integer> directorsId) {
         try {
             Specification<Series> spec = SeriesSpecification.filterSeries(id, seriesName, directorsId);
             List<Series> series = seriesRepository.findAll(spec);

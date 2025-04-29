@@ -3,10 +3,12 @@ package br.com.walkflix.Service.Actor;
 import br.com.walkflix.Config.MapperUtil;
 import br.com.walkflix.Model.ApiResponse;
 import br.com.walkflix.Model.DTO.Actor.ActorDTO;
+import br.com.walkflix.Model.DTO.Character.CharacterDTO;
 import br.com.walkflix.Model.DTO.Series.SeriesDTO;
 import br.com.walkflix.Model.Entitie.Actor.Actor;
 import br.com.walkflix.Model.Entitie.Actor.ActorRepository;
 import br.com.walkflix.Model.Entitie.Actor.ActorSpecification;
+import br.com.walkflix.Model.Entitie.Character.Character;
 import br.com.walkflix.Model.Entitie.Series.Series;
 import br.com.walkflix.Model.Entitie.Series.SeriesRepository;
 import br.com.walkflix.Service.Image.ImageService;
@@ -210,6 +212,28 @@ public class ActorService {
                 ));
             }
         } catch (Exception e) {
+            return DefaultErroMessage.getDefaultError(e);
+        }
+    }
+
+    public ResponseEntity<ApiResponse> getActorCharacters(int actorId){
+        try {
+            List<Character> actorCharacters = actorRepository.findCharactersByActorId(actorId);
+
+            if(!actorCharacters.isEmpty()) {
+                return ResponseEntity.ok().body(new ApiResponse(
+                        "Personagens encontradas com sucesso!",
+                        actorCharacters.stream().map(character -> MapperUtil.convert(character, CharacterDTO.class)).toList(),
+                        HttpStatus.OK.value()
+                ));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
+                        "Não foram encontradas nenhum personagem vinculado com este ator/atriz",
+                        null,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+            }
+        } catch (Exception e){
             return DefaultErroMessage.getDefaultError(e);
         }
     }

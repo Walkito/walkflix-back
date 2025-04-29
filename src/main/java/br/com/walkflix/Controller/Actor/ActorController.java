@@ -78,4 +78,9 @@ public class ActorController {
     public ResponseEntity<ApiResponse> getActorSeries(@RequestParam(name = "id") int id) {
         return actorService.getActorSeries(id);
     }
+
+    @GetMapping(path = "/actorCharacters")
+    public ResponseEntity<ApiResponse> getActorCharacters(@RequestParam(name = "id") int id){
+        return actorService.getActorCharacters(id);
+    }
 }

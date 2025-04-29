@@ -49,8 +49,6 @@ public class CharacterService {
     public ResponseEntity<ApiResponse> createCharacter(CharacterDTO characterDTO) {
         try {
             Character character = MapperUtil.convert(characterDTO, Character.class);
-            Actor actor = actorRepository.getReferenceById(characterDTO.getIdActor());
-            character.setActor(actor);
 
             return ResponseEntity.created(URI.create("/character")).body(new ApiResponse(
                     "Personagem criado com sucesso.",

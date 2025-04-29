@@ -1,5 +1,6 @@
 package br.com.walkflix.Model.DTO.Character;
 
+import br.com.walkflix.Model.DTO.Actor.ActorDTO;
 import br.com.walkflix.Model.Enum.CharacterStatus.CharacterStatus;
 import br.com.walkflix.Model.Enum.CharacterType.CharacterType;
 
@@ -12,7 +13,7 @@ public class CharacterDTO {
 
     private CharacterType tpCharacterType;
 
-    private int idActor;
+    private ActorDTO actor;
 
     private int nuFirstEpisode;
 
@@ -51,12 +52,12 @@ public class CharacterDTO {
         this.tpCharacterStatus = tpCharacterStatus;
     }
 
-    public int getIdActor() {
-        return idActor;
+    public ActorDTO getActor() {
+        return actor;
     }
 
-    public void setIdActor(int idActor) {
-        this.idActor = idActor;
+    public void setActor(ActorDTO actor) {
+        this.actor = actor;
     }
 
     public CharacterType getTpCharacterType() {

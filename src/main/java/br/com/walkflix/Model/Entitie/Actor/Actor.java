@@ -49,6 +49,9 @@ public class Actor {
     @Column(columnDefinition = "TEXT")
     private String txBiography;
 
+    @Column
+    private boolean director;
+
     @ManyToOne
     private Series firstSeries;
 
@@ -62,6 +65,14 @@ public class Actor {
     private List<Series> directedSeries = new ArrayList<>();
 
     public Actor() {
+    }
+
+    public boolean isDirector() {
+        return director;
+    }
+
+    public void setDirector(boolean director) {
+        this.director = director;
     }
 
     public List<Series> getDirectedSeries() {

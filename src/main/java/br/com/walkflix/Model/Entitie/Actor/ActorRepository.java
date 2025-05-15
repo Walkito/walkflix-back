@@ -15,4 +15,6 @@ public interface ActorRepository extends JpaRepository<Actor, Integer>, JpaSpeci
 
     @Query("SELECT c FROM Actor a JOIN a.characters c WHERE a.id = :id ORDER BY c.txCharacterName")
     List<Character> findCharactersByActorId(@Param("id") int id);
+
+    List<Actor> findByDirectorTrue();
 }

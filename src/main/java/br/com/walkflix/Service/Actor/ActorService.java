@@ -113,25 +113,6 @@ public class ActorService {
         }
     }
 
-    public ResponseEntity<ApiResponse> getActor(int id) {
-        try {
-            Optional<Actor> actor = actorRepository.findById(id);
-
-            return actor.map(value -> ResponseEntity.ok().body(new ApiResponse(
-                    "Ator retornado com sucesso!",
-                    MapperUtil.convert(value, ActorDTO.class),
-                    HttpStatus.OK.value()
-            ))).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    new ApiResponse(
-                            "Ator não encontrado.",
-                            null,
-                            HttpStatus.NOT_FOUND.value()
-                    )));
-        } catch (Exception e) {
-            return DefaultErroMessage.getDefaultError(e);
-        }
-    }
-
     public ResponseEntity<ApiResponse> getAllActors() {
         try {
             List<Actor> actors = actorRepository.findAll();
@@ -152,7 +133,7 @@ public class ActorService {
 
     public ResponseEntity<ApiResponse> getAllDirectors() {
         try {
-            List<Actor> directors = seriesRepository.findAllDirectorsFromSeries();
+            List<Actor> directors = actorRepository.findByDirectorTrue();
 
             return !directors.isEmpty() ? ResponseEntity.ok(new ApiResponse(
                     "Diretores encontrados com sucesso.",

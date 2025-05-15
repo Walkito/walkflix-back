@@ -21,7 +21,17 @@ public class ActorDTO {
 
     private String txBiography;
 
+    private boolean director;
+
     public ActorDTO() {
+    }
+
+    public boolean isDirector() {
+        return director;
+    }
+
+    public void setDirector(boolean director) {
+        this.director = director;
     }
 
     public int getId() {

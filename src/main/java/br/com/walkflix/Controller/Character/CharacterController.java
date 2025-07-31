@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(path = "/character")
 public class CharacterController {
@@ -55,12 +57,10 @@ public class CharacterController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse> getCharacter(@RequestParam(name = "id") int id){
-        return characterService.getCharacter(id);
-    }
-
-    @GetMapping(path = "/series")
-    public ResponseEntity<ApiResponse> getAllCharacterBySeries(@RequestParam(name = "idSeries") int idSeries){
-        return characterService.getAllCharacterBySeries(idSeries);
+    public ResponseEntity<ApiResponse> getCharacter(@RequestParam(name = "id") int id,
+                                                    @RequestParam(name = "characterName") String characterName,
+                                                    @RequestParam(name = "actors") List<Integer> actors,
+                                                    @RequestParam(name = "series") List<Integer> series){
+        return characterService.getCharacter(id, characterName, actors, series);
     }
 }

@@ -7,8 +7,10 @@ import br.com.walkflix.Model.Entitie.Actor.Actor;
 import br.com.walkflix.Model.Entitie.Actor.ActorRepository;
 import br.com.walkflix.Model.Entitie.Character.Character;
 import br.com.walkflix.Model.Entitie.Character.CharacterRepository;
+import br.com.walkflix.Model.Entitie.Character.CharacterSpecification;
 import br.com.walkflix.Utils.DefaultErroMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -25,8 +27,8 @@ public class CharacterService {
     @Autowired
     private ActorRepository actorRepository;
 
-    public ResponseEntity<ApiResponse> saveFilePath(int id, String filePath){
-        try{
+    public ResponseEntity<ApiResponse> saveFilePath(int id, String filePath) {
+        try {
             return characterRepository.findById(id).map(character -> {
                 character.setTxCharacterPicture(filePath);
                 characterRepository.save(character);
@@ -41,7 +43,7 @@ public class CharacterService {
                     null,
                     HttpStatus.NOT_FOUND.value()
             )));
-        } catch(Exception e){
+        } catch (Exception e) {
             return DefaultErroMessage.getDefaultError(e);
         }
     }
@@ -110,37 +112,26 @@ public class CharacterService {
 
     }
 
-    public ResponseEntity<ApiResponse> getCharacter(int id) {
+    public ResponseEntity<ApiResponse> getCharacter(int id, String characterName, List<Integer> series, List<Integer> actors) {
         try {
-            Optional<Character> character = characterRepository.findById(id);
+            Specification<Character> spec = CharacterSpecification.filterCharacter(id, characterName, series, actors);
+            List<Character> characters = characterRepository.findAll(spec);
 
-            return character.map(value -> ResponseEntity.ok().body(new ApiResponse(
-                    "Personagem encontrado",
-                    MapperUtil.convert(value, CharacterDTO.class),
-                    HttpStatus.OK.value()
-            ))).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
-                    "Personagem não encontrado.",
-                    null,
-                    HttpStatus.NOT_FOUND.value()
-            )));
-        } catch (Exception e) {
-            return DefaultErroMessage.getDefaultError(e);
-        }
-    }
+            if (!characters.isEmpty()) {
+                List<CharacterDTO> characterDTOS = characters.stream().map(character -> MapperUtil.convert(character, CharacterDTO.class)).toList();
 
-    public ResponseEntity<ApiResponse> getAllCharacterBySeries(int idSeries) {
-        try {
-            List<Character> characters = characterRepository.findAllBySeriesId(idSeries);
-
-            return !characters.isEmpty() ? ResponseEntity.ok().body(new ApiResponse(
-                    "Personagems encontrados.",
-                    characters.stream().map(character -> MapperUtil.convert(characters, CharacterDTO.class)).toList(),
-                    HttpStatus.OK.value()
-            )) : ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(
-                    "Nenhum personagem encontrado para esta série.",
-                    null,
-                    HttpStatus.NOT_FOUND.value()
-            ));
+                return ResponseEntity.ok(new ApiResponse(
+                        "Personagens encontrados com sucesso.",
+                        characterDTOS,
+                        HttpStatus.OK.value()
+                ));
+            } else {
+                return ResponseEntity.ok(new ApiResponse(
+                        "Não foram encontrados personagens.",
+                        null,
+                        HttpStatus.OK.value()
+                ));
+            }
         } catch (Exception e) {
             return DefaultErroMessage.getDefaultError(e);
         }

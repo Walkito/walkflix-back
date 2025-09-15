@@ -61,6 +61,6 @@ public class CharacterController {
                                                     @RequestParam(name = "characterName") String characterName,
                                                     @RequestParam(name = "actors") List<Integer> actors,
                                                     @RequestParam(name = "series") List<Integer> series){
-        return characterService.getCharacter(id, characterName, actors, series);
+        return characterService.getCharacter(id, characterName, series, actors);
     }
 }

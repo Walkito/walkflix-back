@@ -25,7 +25,17 @@ public class CharacterDTO {
 
     private String txCharacterPicture;
 
+    private boolean tpNpc;
+
     public CharacterDTO() {
+    }
+
+    public boolean isTpNpc() {
+        return tpNpc;
+    }
+
+    public void setTpNpc(boolean tpNpc) {
+        this.tpNpc = tpNpc;
     }
 
     public int getId() {

@@ -56,10 +56,21 @@ public class Character {
     @Column(columnDefinition = "TEXT")
     private String txCharacterPicture;
 
+    @Column(nullable = false)
+    private Boolean tpNpc;
+
     @ManyToMany(mappedBy = "characters")
     private List<Series> series = new ArrayList<>();
 
     public Character() {
+    }
+
+    public Boolean getTpNpc() {
+        return tpNpc;
+    }
+
+    public void setTpNpc(Boolean tpNpc) {
+        this.tpNpc = tpNpc;
     }
 
     public void setTpCharacterStatus(CharacterStatus tpCharacterStatus) {
